@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 export default function Home() {
 
   const [weatherData,setWeatherData] = useState(null);
+  const [forecastData, setForecastData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -36,6 +37,19 @@ export default function Home() {
     fetchWeatherData();
   }, [city, apiKey, units]);  
 
+  useEffect(() => {
+    fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&cnt=5&appid=${apiKey}`)
+      .then((response) => response.json())
+      .then((data) => {
+        setForecastData(data.list);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching forecast data:", error);
+        setLoading(false);
+      });
+  }, []);
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
@@ -48,6 +62,15 @@ export default function Home() {
     const month = monthsOfYear[date.getMonth()];
     
     return `${day}, ${dayOfMonth} ${month}`;
+  };
+
+  const formatTime = (timestamp, timezoneOffset = 0) => {
+    const localTime = new Date((timestamp + timezoneOffset) * 1000);
+    return localTime.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
   };
   const currentDate = new Date();
   const time = currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -88,11 +111,31 @@ export default function Home() {
         </div>
 
         {/* Weather details */}
-        <div className="w-[780px] h-[330px] bg-[#444444] shadow-[10px_10px_4px_#000000] rounded-[30px] text-white flex items-center justify-items-center">
+        <div className="w-[780px] h-[330px] bg-[#444444] shadow-[10px_10px_4px_#000000] rounded-[30px] text-white flex items-center justify-around">
 
-          <div className="w-[204px] h-[300px] rounded-lg shadow-lg"></div>
-          <div className="w-[270px] h-[300px] rounded-lg shadow-lg"></div>
-          <div className="w-[250px] h-[300px] rounded-lg shadow-lg"></div>
+            <div className="w-[204px] h-[300px] rounded-lg shadow-lg flex flex-col items-center justify-around text-white">   
+              
+              
+              <p className="text-[60px]">{weatherData.main.temp}°C  </p>
+              <p>Feels like: {weatherData.main.feels_like}°C</p>            
+              <p>Sunrise: {formatTime(weatherData.sys.sunrise, weatherData.timezone)}</p>
+              <p>Sunset: {formatTime(weatherData.sys.sunset, weatherData.timezone)}</p>          
+
+              
+            </div>
+
+            <div className="w-[270px] h-[300px] rounded-lg shadow-lg">
+
+
+
+              <p>{weatherData.weather[0].description}</p>
+            </div>
+
+
+            <div className="w-[250px] h-[300px] rounded-lg shadow-lg">
+            <p>Humidity: {weatherData.main.humidity}%</p>
+            <p>Wind: {weatherData.wind.speed} m/s</p>
+            </div>
 
         </div>
       </div>
@@ -102,38 +145,30 @@ export default function Home() {
 
         {/* 5 days Forecast */}
         <div className="w-[414px] h-[366px] rounded-lg bg-[#444444] shadow-[10px_10px_4px_#000000] rounded-[30px] text-white">
-          <h1 className="text-center text-[32px] mb-6 mt-2">5 Days Forecast:</h1>
+          <h1 className="text-center text-[32px] mb-6 mt-2">5 Days Forecast:</h1> 
+               
+          {forecastData.map((forecast, index) => {
+          const date = new Date(forecast.dt * 1000);
+          const day = date.toLocaleString("en-US", { weekday: "long" });
+          const dayNumber = date.getDate();
+          const month = date.toLocaleString("en-US", { month: "short" });
 
-          <div className="flex items-center justify-around mb-6">
-            <p>Icon</p>
-            <p>20 C</p>
-            <p>Friday, 1 Sep</p>
-            <p>Wind: {weatherData.wind.speed} m/s</p>
-          </div>
+          // Explicitly return JSX for each forecast
+          return (
+            <div key={index} className="flex items-center justify-around mb-6">
+              <Image
+                src={`https://openweathermap.org/img/wn/${forecast.weather[0].icon}@2x.png`}
+                alt={forecast.weather[0].description}
+                width={40}
+                height={40}
+              />
+              <p>{Math.round(forecast.main.temp)}°C</p>
+              <p>{`${day}, ${dayNumber} ${month}`}</p>
+            </div>
+          );
+        })}
+  
 
-          <div className="flex items-center justify-around mb-6">
-            <p>Icon</p>
-            <p>19 C</p>
-            <p>Friday, 2 Sep</p>
-          </div>
-
-          <div className="flex items-center justify-around mb-6">
-            <p>Icon</p>
-            <p>18 C</p>
-            <p>Friday, 3 Sep</p>
-          </div>
-
-          <div className="flex items-center justify-around mb-6">
-            <p>Icon</p>
-            <p>22 C</p>
-            <p>Friday, 4 Sep</p>
-          </div>
-
-          <div className="flex items-center justify-around mb-6">
-            <p>Icon</p>
-            <p>21 C</p>
-            <p>Friday, 5 Sep</p>
-          </div>
         </div>
 
         {/* Hourly Forecast */}
