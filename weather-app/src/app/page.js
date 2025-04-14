@@ -212,15 +212,32 @@ export default function Home() {
         <div className="w-full max-w-3xl h-auto min-h-[300px] md:min-h-[366px] rounded-2xl md:rounded-[30px] bg-[#444444] shadow-md md:shadow-[10px_10px_4px_#000000] text-white p-4">
           <h1 className="text-center text-xl md:text-[32px] mb-4 md:mb-6 mt-2">Hourly Forecast:</h1>
           <div className="rounded-lg flex flex-wrap md:flex-nowrap items-center justify-center md:justify-around gap-4">
-            {[1, 2, 3, 4, 5].map((_, index) => (
-              <div key={index} className="w-[calc(50%-8px)] sm:w-[130px] h-auto min-h-[220px] md:min-h-[270px] rounded-2xl md:rounded-[40px] bg-[#373636] flex flex-col items-center justify-around text-white p-3">
-                <p className="text-sm md:text-base">12:00</p>
-                <p className="text-sm md:text-base">Icon</p>
-                <p className="text-sm md:text-base">25°C</p>
-                <p className="text-sm md:text-base">Icon</p>
-                <p className="text-sm md:text-base">3km/h</p>
-              </div>
-            ))}
+          {forecastData.map((data, index) => {
+            
+              const time = new Date(data.dt * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+             
+              const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}.png`;
+
+              return (
+                <div key={index} className="w-[calc(50%-8px)] sm:w-[130px] h-auto min-h-[220px] md:min-h-[270px] rounded-2xl md:rounded-[40px] bg-[#373636] flex flex-col items-center justify-around text-white p-3">                
+                  <p className="text-sm md:text-base">{time}</p>               
+                  <Image src={iconUrl} alt="Weather Icon" width={40} height={40} />          
+                  <p className="text-sm md:text-base">{Math.round(data.main.temp)}°C</p>   
+                  <Image
+                    src="/icons/navigation.png"
+                    width={50}
+                    height={50}
+                    className="text-lg md:text-xl"
+                    alt="Wind speed direction"
+                    style={{ transform: `rotate(${data.wind.deg}deg)` }}
+                  />
+                  
+                        
+                  <p className="text-sm md:text-base">{Math.round(data.wind.speed)} km/h</p>
+                </div>
+              );
+            })}
+
           </div>
         </div>
       </div>
