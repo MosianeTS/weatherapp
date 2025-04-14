@@ -4,17 +4,19 @@ import Image from "next/image";
 import React, { useState, useEffect } from 'react';
 
 export default function Home() {
-
+  const [inputCity, setInputCity] = useState('Johannesburg');
   const [weatherData, setWeatherData] = useState(null);
   const [forecastData, setForecastData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [city, setCity] = useState('Johannesburg');
 
   const apiKey = '2b5155e071f8bdc3b09d96402b4c9adc'; 
-  const city = 'Johannesburg'; 
   const units = 'metric'; 
 
   useEffect(() => {
+    if (!city) return; // Prevent the API call if city is 
+    setLoading(true);
     const fetchWeatherData = async () => {
       try {
         const response = await fetch(
@@ -26,7 +28,7 @@ export default function Home() {
           setWeatherData(data);  
           setLoading(false);
         } else {
-          throw new Error(data.message);  
+          throw new Error(data.message || 'Failed to fetch weather data');   
         }
       } catch (err) {
         setError(err.message);
@@ -38,9 +40,11 @@ export default function Home() {
   }, [city, apiKey, units]);  
 
   useEffect(() => {
-    fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&cnt=5&appid=${apiKey}`)
+    if (!city) return; // Prevent the API call if city is empty
+    fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&cnt=40&appid=${apiKey}`)
       .then((response) => response.json())
       .then((data) => {
+        // Set the full list
         setForecastData(data.list);
         setLoading(false);
       })
@@ -50,7 +54,13 @@ export default function Home() {
       });
   }, []);
 
-  if (loading) return <div>Loading...</div>;
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setCity(inputCity);
+  };
+  
+
+  if (loading && !weatherData) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
   const formatDate = (date) => {
@@ -85,14 +95,16 @@ export default function Home() {
 
       {/* Top section */}
       <div className="w-full max-w-full sm:max-w-3xl">
-        <form>
+        <form onSubmit={handleSubmit}>
           <div className="relative w-full h-12 md:h-16">
             <input
               className="w-full h-full pl-12 pr-4 shadow-lg md:shadow-[0px_4px_40px_#000000] rounded-full md:rounded-[40px] focus:outline-none dark:bg-[#222] dark:text-white text-sm md:text-base"
               placeholder="Search for your preferred city..."
+              value={inputCity} 
+              onChange={(e) => setInputCity(e.target.value)} 
             />
             <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-              <Image src="/search-icon.svg" alt="Search" width={24} height={24} />
+              <Image src="/icons/search.png" alt="Search" width={24} height={24} />
             </div>
           </div>
         </form>
@@ -152,28 +164,28 @@ export default function Home() {
               <div className="w-full h-auto text-white rounded-lg p-4 text-center flex flex-col items-center justify-center">
                 <Image src="/icons/humidity.png" alt="Humidity" width={60} height={60} />
                 <p className="text-xl font-semibold mt-2">{weatherData.main.humidity}%</p>
-                <p className="text-sm text-gray-600">Humidity</p>
+                <p className="text-sm text-white">Humidity</p>
               </div>
 
               {/* Wind Speed */}
               <div className="w-full h-auto min-w-[150px] text-white rounded-lg  p-4 text-center flex flex-col items-center justify-center">
                 <Image src="/icons/wind.png" alt="Wind Speed" width={60} height={60} />
-                <p className="text-xl font-semibold mt-2">{weatherData.wind.speed} m/s</p>
-                <p className="text-sm text-gray-600">Wind Speed</p>
+                <p className="text-xl font-semibold mt-2">{weatherData.wind.speed * 3.6} km/h</p>
+                <p className="text-sm text-white">Wind Speed</p>
               </div>
 
               {/* Pressure */}
               <div className="w-full h-auto text-white rounded-lg p-4 text-center flex flex-col items-center justify-center">
                 <Image src="/icons/pressure.png" alt="Pressure" width={60} height={60} />
                 <p className="text-xl font-semibold mt-2">{weatherData.main.pressure} hPa</p>
-                <p className="text-sm text-gray-600">Pressure</p>
+                <p className="text-sm text-white">Pressure</p>
               </div>
 
               {/* UV */}
               <div className="w-full h-auto text-white rounded-lg  p-4 text-center flex flex-col items-center justify-center">
                 <Image src="/icons/uv.png" alt="UV" width={60} height={60} />
                 <p className="text-xl font-semibold mt-2">{weatherData.current?.uvi ?? "N/A"}</p>
-                <p className="text-sm text-gray-600">UV</p>
+                <p className="text-sm text-white">UV</p>
               </div>
             </div>
 
@@ -187,32 +199,39 @@ export default function Home() {
         <div className="w-full max-w-md h-auto min-h-[300px] md:min-h-[366px] rounded-2xl md:rounded-[30px] bg-[#444444] shadow-md md:shadow-[10px_10px_4px_#000000] text-white p-4">
           <h1 className="text-center text-xl md:text-[32px] mb-4 md:mb-6 mt-2">5 Days Forecast:</h1> 
                
-          {forecastData.map((forecast, index) => {
-            const date = new Date(forecast.dt * 1000);
-            const day = date.toLocaleString("en-US", { weekday: "long" });
-            const dayNumber = date.getDate();
-            const month = date.toLocaleString("en-US", { month: "short" });
+          {forecastData
+            .filter((forecast) => forecast.dt_txt.includes("12:00:00"))
+            .slice(0, 5)
+            .map((forecast, index) => {
+              const date = new Date(forecast.dt * 1000);
+              const day = date.toLocaleString("en-US", { weekday: "long" });
+              const dayNumber = date.getDate();
+              const month = date.toLocaleString("en-US", { month: "short" });
 
-            return (
-              <div key={index} className="flex items-center justify-between md:justify-around mb-4 md:mb-6 px-2">
-                <Image
-                  src={`https://openweathermap.org/img/wn/${forecast.weather[0].icon}@2x.png`}
-                  alt={forecast.weather[0].description}
-                  width={40}
-                  height={40}
-                />
-                <p className="text-sm md:text-base">{Math.round(forecast.main.temp)}°C</p>
-                <p className="text-sm md:text-base">{`${day}, ${dayNumber} ${month}`}</p>
-              </div>
-            );
-          })}
+              return (
+                <div
+                  key={index}
+                  className="flex items-center justify-between md:justify-around mb-4 md:mb-6 px-2"
+                >
+                  <Image
+                    src={`https://openweathermap.org/img/wn/${forecast.weather[0].icon}@2x.png`}
+                    alt={forecast.weather[0].description}
+                    width={80}
+                    height={80}
+                  />
+                  <p className="text-sm md:text-base">{Math.round(forecast.main.temp)}°C</p>
+                  <p className="text-sm md:text-base">{`${day}, ${dayNumber} ${month}`}</p>
+                </div>
+              );
+            })}
+
         </div>
 
         {/* Hourly Forecast */}
         <div className="w-full max-w-3xl h-auto min-h-[300px] md:min-h-[366px] rounded-2xl md:rounded-[30px] bg-[#444444] shadow-md md:shadow-[10px_10px_4px_#000000] text-white p-4">
           <h1 className="text-center text-xl md:text-[32px] mb-4 md:mb-6 mt-2">Hourly Forecast:</h1>
           <div className="rounded-lg flex flex-wrap md:flex-nowrap items-center justify-center md:justify-around gap-4">
-          {forecastData.map((data, index) => {
+          {forecastData.slice(0, 5).map((data, index) => {
             
               const time = new Date(data.dt * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
              
@@ -221,8 +240,8 @@ export default function Home() {
               return (
                 <div key={index} className="w-[calc(50%-8px)] sm:w-[130px] h-auto min-h-[220px] md:min-h-[270px] rounded-2xl md:rounded-[40px] bg-[#373636] flex flex-col items-center justify-around text-white p-3">                
                   <p className="text-sm md:text-base">{time}</p>               
-                  <Image src={iconUrl} alt="Weather Icon" width={40} height={40} />          
-                  <p className="text-sm md:text-base">{Math.round(data.main.temp)}°C</p>   
+                  <Image src={iconUrl} alt="Weather Icon" width={80} height={80} />          
+                  <p className="text-[24px] md:text-base">{Math.round(data.main.temp)}°C</p>   
                   <Image
                     src="/icons/navigation.png"
                     width={50}
@@ -230,10 +249,9 @@ export default function Home() {
                     className="text-lg md:text-xl"
                     alt="Wind speed direction"
                     style={{ transform: `rotate(${data.wind.deg}deg)` }}
-                  />
-                  
+                  />                  
                         
-                  <p className="text-sm md:text-base">{Math.round(data.wind.speed)} km/h</p>
+                  <p className="text-sm md:text-base">{Math.round(data.wind.speed)*3.6} km/h</p>
                 </div>
               );
             })}
