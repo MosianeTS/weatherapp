@@ -120,24 +120,63 @@ export default function Home() {
                   <p className="m-0 leading-tight">Feels like: <span className="text-xl md:text-[32px]">{weatherData.main.feels_like.toFixed(0)}°C</span></p>
               </div>
 
-              <div className="text-center md:text-left">
-                  <div>
+              <div className="text-center md:text-left">               
+                  <div className="flex gap-[20px]">
+                      <div>
+                         <Image src="/icons/sunrise.png" alt="Sunrise icon" width={50} height={50} />
+                      </div>
+                      <div>
+                        <p className="font-normal">Sunrise</p>
+                        <p className="mb-4">{formatTime(weatherData.sys.sunrise, weatherData.timezone)}</p>  
+                      </div>                                      
                   </div>
-                  <div>
-                      <p>Sunrise: {formatTime(weatherData.sys.sunrise, weatherData.timezone)}</p>
-                      <p>Sunset: {formatTime(weatherData.sys.sunset, weatherData.timezone)}</p> 
-                  </div>
+                  <div className="flex gap-[20px]">
+                      <div>
+                         <Image src="/icons/sunset.png" alt="Sunset icon" width={50} height={50} />
+                      </div>
+                      <div>
+                        <p className="font-normal">Sunset</p>
+                        <p className="mb-4">{formatTime(weatherData.sys.sunset, weatherData.timezone)}</p>  
+                      </div>                                      
+                  </div>                
               </div>
             </div>
 
-            <div className="w-full md:w-[270px] h-auto md:h-[300px] rounded-lg text-center">
-              <p className="text-lg">{weatherData.weather[0].description}</p>
+            <div className="w-full md:w-[270px] h-auto md:h-[300px] rounded-lg text-center flex flex-col">
+              <Image src="/icons/sunny.png" alt="Sunny icon" width={270} height={270} />
+              <p className="text-[32px]">{weatherData.weather[0].description}</p>
             </div>
 
-            <div className="w-full md:w-[250px] h-auto md:h-[300px] rounded-lg text-center md:text-left">
-              <p>Humidity: {weatherData.main.humidity}%</p>
-              <p>Wind: {weatherData.wind.speed} m/s</p>
+            <div className="grid grid-cols-2 gap-4 md:gap-6">
+              {/* Humidity */}
+              <div className="w-full h-auto text-white rounded-lg p-4 text-center flex flex-col items-center justify-center">
+                <Image src="/icons/humidity.png" alt="Humidity" width={60} height={60} />
+                <p className="text-xl font-semibold mt-2">{weatherData.main.humidity}%</p>
+                <p className="text-sm text-gray-600">Humidity</p>
+              </div>
+
+              {/* Wind Speed */}
+              <div className="w-full h-auto min-w-[150px] text-white rounded-lg  p-4 text-center flex flex-col items-center justify-center">
+                <Image src="/icons/wind.png" alt="Wind Speed" width={60} height={60} />
+                <p className="text-xl font-semibold mt-2">{weatherData.wind.speed} m/s</p>
+                <p className="text-sm text-gray-600">Wind Speed</p>
+              </div>
+
+              {/* Pressure */}
+              <div className="w-full h-auto text-white rounded-lg p-4 text-center flex flex-col items-center justify-center">
+                <Image src="/icons/pressure.png" alt="Pressure" width={60} height={60} />
+                <p className="text-xl font-semibold mt-2">{weatherData.main.pressure} hPa</p>
+                <p className="text-sm text-gray-600">Pressure</p>
+              </div>
+
+              {/* UV */}
+              <div className="w-full h-auto text-white rounded-lg  p-4 text-center flex flex-col items-center justify-center">
+                <Image src="/icons/uv.png" alt="UV" width={60} height={60} />
+                <p className="text-xl font-semibold mt-2">{weatherData.current?.uvi ?? "N/A"}</p>
+                <p className="text-sm text-gray-600">UV</p>
+              </div>
             </div>
+
         </div>
       </div>
 
