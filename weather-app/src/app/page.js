@@ -1,11 +1,11 @@
 "use client";
 import Image from "next/image";
-import ThemeToggle from "./ThemeToggle";
+// import Dashboard from "./ThemeToggle";
 import React, { useState, useEffect } from 'react';
 
 export default function Home() {
 
-  const [weatherData,setWeatherData] = useState(null);
+  const [weatherData, setWeatherData] = useState(null);
   const [forecastData, setForecastData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -78,17 +78,17 @@ export default function Home() {
 
 
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen p-8 pb-32 gap-16 sm:p-20 font-[Poppins] dark:bg-black dark:text-white">
+    <div className="flex flex-col items-center justify-start min-h-screen p-4 md:p-8 pb-16 md:pb-32 gap-8 md:gap-16 font-[Poppins] dark:bg-black dark:text-white">
 
       {/* Theme Toggle */}
-      {/* <ThemeToggle /> */}
+      {/* <Dashboard /> */}
 
       {/* Top section */}
-      <div>
+      <div className="w-full max-w-full sm:max-w-3xl">
         <form>
-          <div className="relative w-[803px] h-[62px]">
+          <div className="relative w-full h-12 md:h-16">
             <input
-              className="w-full h-full pl-12 pr-4 shadow-[0px_4px_40px_#000000] rounded-[40px] focus:outline-none dark:bg-[#222] dark:text-white"
+              className="w-full h-full pl-12 pr-4 shadow-lg md:shadow-[0px_4px_40px_#000000] rounded-full md:rounded-[40px] focus:outline-none dark:bg-[#222] dark:text-white text-sm md:text-base"
               placeholder="Search for your preferred city..."
             />
             <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
@@ -99,126 +99,92 @@ export default function Home() {
       </div>
 
       {/* Current day weather */}
-      <div className="flex items-center justify-items-center gap-[80px]">
+      <div className="flex flex-col lg:flex-row items-center justify-center w-full gap-6 md:gap-8 lg:gap-[80px]">
 
         {/* Location, time, date */}
-        <div className="w-[510px] h-[330px] bg-[#444444] shadow-[10px_10px_4px_#000000] rounded-[30px] text-white">
-          <h1 className="font-[Poppins] font-bold text-[36px] leading-[100%] tracking-[0] text-center mt-[60px] font-bold">{weatherData.name}</h1>
-          <div className="w-[296px] h-[144px] mx-auto">
-            <h1 className="font-[Poppins] font-bold text-[36px] leading-[100%] tracking-[0] text-center mt-[50px] text-[96px]">{time}</h1>
-            <p className="text-center text-[20px] font-light">{date}</p>
+        <div className="w-full max-w-md h-auto min-h-[280px] md:min-h-[330px] bg-[#444444] shadow-md md:shadow-[10px_10px_4px_#000000] rounded-2xl md:rounded-[30px] text-white p-4">
+          <h1 className="font-bold text-2xl md:text-[36px] leading-[100%] tracking-[0] text-center mt-4 md:mt-[60px]">{weatherData.name}</h1>
+          <div className="w-full max-w-[296px] h-auto mx-auto">
+            <h1 className="font-bold text-6xl md:text-[96px] leading-[100%] tracking-[0] text-center mt-6 md:mt-[50px]">{time}</h1>
+            <p className="text-center text-base md:text-[20px] font-light">{date}</p>
           </div>
         </div>
 
         {/* Weather details */}
-        <div className="w-[780px] h-[330px] bg-[#444444] shadow-[10px_10px_4px_#000000] rounded-[30px] text-white flex items-center justify-around">
+        <div className="w-full max-w-3xl h-auto min-h-[280px] md:min-h-[330px] bg-[#444444] shadow-md md:shadow-[10px_10px_4px_#000000] rounded-2xl md:rounded-[30px] text-white p-4 flex flex-col md:flex-row items-center justify-around gap-4">
 
-            <div className="w-[204px] h-[300px] rounded-lg shadow-lg flex flex-col items-center justify-around text-white">   
+            <div className="w-full md:w-[280px] h-auto md:h-[300px] rounded-lg flex flex-col items-center justify-around text-white">   
               
-              
-              <p className="text-[60px]">{weatherData.main.temp}°C  </p>
-              <p>Feels like: {weatherData.main.feels_like}°C</p>            
-              <p>Sunrise: {formatTime(weatherData.sys.sunrise, weatherData.timezone)}</p>
-              <p>Sunset: {formatTime(weatherData.sys.sunset, weatherData.timezone)}</p>          
+              <div className="w-full max-w-[204px] text-center md:text-left">
+                  <p className="text-5xl md:text-[70px] m-0 leading-[1]">{weatherData.main.temp.toFixed(0)}°C</p>
+                  <p className="m-0 leading-tight">Feels like: <span className="text-xl md:text-[32px]">{weatherData.main.feels_like.toFixed(0)}°C</span></p>
+              </div>
 
-              
+              <div className="text-center md:text-left">
+                  <div>
+                  </div>
+                  <div>
+                      <p>Sunrise: {formatTime(weatherData.sys.sunrise, weatherData.timezone)}</p>
+                      <p>Sunset: {formatTime(weatherData.sys.sunset, weatherData.timezone)}</p> 
+                  </div>
+              </div>
             </div>
 
-            <div className="w-[270px] h-[300px] rounded-lg shadow-lg">
-
-
-
-              <p>{weatherData.weather[0].description}</p>
+            <div className="w-full md:w-[270px] h-auto md:h-[300px] rounded-lg text-center">
+              <p className="text-lg">{weatherData.weather[0].description}</p>
             </div>
 
-
-            <div className="w-[250px] h-[300px] rounded-lg shadow-lg">
-            <p>Humidity: {weatherData.main.humidity}%</p>
-            <p>Wind: {weatherData.wind.speed} m/s</p>
+            <div className="w-full md:w-[250px] h-auto md:h-[300px] rounded-lg text-center md:text-left">
+              <p>Humidity: {weatherData.main.humidity}%</p>
+              <p>Wind: {weatherData.wind.speed} m/s</p>
             </div>
-
         </div>
       </div>
 
       {/* Forecast */}
-      <div className="flex items-center justify-items-center gap-[80px] ">
+      <div className="flex flex-col lg:flex-row items-center justify-center w-full gap-6 md:gap-8 lg:gap-[80px]">
 
         {/* 5 days Forecast */}
-        <div className="w-[414px] h-[366px] rounded-lg bg-[#444444] shadow-[10px_10px_4px_#000000] rounded-[30px] text-white">
-          <h1 className="text-center text-[32px] mb-6 mt-2">5 Days Forecast:</h1> 
+        <div className="w-full max-w-md h-auto min-h-[300px] md:min-h-[366px] rounded-2xl md:rounded-[30px] bg-[#444444] shadow-md md:shadow-[10px_10px_4px_#000000] text-white p-4">
+          <h1 className="text-center text-xl md:text-[32px] mb-4 md:mb-6 mt-2">5 Days Forecast:</h1> 
                
           {forecastData.map((forecast, index) => {
-          const date = new Date(forecast.dt * 1000);
-          const day = date.toLocaleString("en-US", { weekday: "long" });
-          const dayNumber = date.getDate();
-          const month = date.toLocaleString("en-US", { month: "short" });
+            const date = new Date(forecast.dt * 1000);
+            const day = date.toLocaleString("en-US", { weekday: "long" });
+            const dayNumber = date.getDate();
+            const month = date.toLocaleString("en-US", { month: "short" });
 
-          // Explicitly return JSX for each forecast
-          return (
-            <div key={index} className="flex items-center justify-around mb-6">
-              <Image
-                src={`https://openweathermap.org/img/wn/${forecast.weather[0].icon}@2x.png`}
-                alt={forecast.weather[0].description}
-                width={40}
-                height={40}
-              />
-              <p>{Math.round(forecast.main.temp)}°C</p>
-              <p>{`${day}, ${dayNumber} ${month}`}</p>
-            </div>
-          );
-        })}
-  
-
+            return (
+              <div key={index} className="flex items-center justify-between md:justify-around mb-4 md:mb-6 px-2">
+                <Image
+                  src={`https://openweathermap.org/img/wn/${forecast.weather[0].icon}@2x.png`}
+                  alt={forecast.weather[0].description}
+                  width={40}
+                  height={40}
+                />
+                <p className="text-sm md:text-base">{Math.round(forecast.main.temp)}°C</p>
+                <p className="text-sm md:text-base">{`${day}, ${dayNumber} ${month}`}</p>
+              </div>
+            );
+          })}
         </div>
 
         {/* Hourly Forecast */}
-        <div className="w-[870px] h-[366px] rounded-[30px] bg-[#444444] shadow-[10px_10px_4px_#000000] text-white">
-          <h1 className="text-center text-[32px] mb-6 mt-2">Hourly Forecast:</h1>
-          <div className="rounded-lg flex items-center justify-around">
-            <div className="w-[130px] h-[270px] rounded-[40px] bg-[#373636] flex flex-col items-center justify-around text-white">
-              <p>12:00</p>
-              <p>Icon</p>
-              <p>25°C</p>
-              <p>Icon</p>
-              <p>3km/h</p>
-            </div>
-
-            <div className="w-[130px] h-[270px] rounded-[40px] bg-[#373636] flex flex-col items-center justify-around text-white">
-              <p>12:00</p>
-              <p>Icon</p>
-              <p>25°C</p>
-              <p>Icon</p>
-              <p>3km/h</p>
-            </div>
-
-            <div className="w-[130px] h-[270px] rounded-[40px] bg-[#373636] flex flex-col items-center justify-around text-white">
-              <p>12:00</p>
-              <p>Icon</p>
-              <p>25°C</p>
-              <p>Icon</p>
-              <p>3km/h</p>
-            </div>
-
-            <div className="w-[130px] h-[270px] rounded-[40px] bg-[#373636] flex flex-col items-center justify-around text-white">
-              <p>12:00</p>
-              <p>Icon</p>
-              <p>25°C</p>
-              <p>Icon</p>
-              <p>3km/h</p>
-            </div>
-
-            <div className="w-[130px] h-[270px] rounded-[40px] bg-[#373636] flex flex-col items-center justify-around text-white">
-              <p>12:00</p>
-              <p>Icon</p>
-              <p>25°C</p>
-              <p>Icon</p>
-              <p>3km/h</p>
-            </div>
+        <div className="w-full max-w-3xl h-auto min-h-[300px] md:min-h-[366px] rounded-2xl md:rounded-[30px] bg-[#444444] shadow-md md:shadow-[10px_10px_4px_#000000] text-white p-4">
+          <h1 className="text-center text-xl md:text-[32px] mb-4 md:mb-6 mt-2">Hourly Forecast:</h1>
+          <div className="rounded-lg flex flex-wrap md:flex-nowrap items-center justify-center md:justify-around gap-4">
+            {[1, 2, 3, 4, 5].map((_, index) => (
+              <div key={index} className="w-[calc(50%-8px)] sm:w-[130px] h-auto min-h-[220px] md:min-h-[270px] rounded-2xl md:rounded-[40px] bg-[#373636] flex flex-col items-center justify-around text-white p-3">
+                <p className="text-sm md:text-base">12:00</p>
+                <p className="text-sm md:text-base">Icon</p>
+                <p className="text-sm md:text-base">25°C</p>
+                <p className="text-sm md:text-base">Icon</p>
+                <p className="text-sm md:text-base">3km/h</p>
+              </div>
+            ))}
           </div>
         </div>
-
       </div>
-
     </div>
   );
 }
