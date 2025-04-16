@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { ThemeToggle } from './ThemeToggle';
+import CurrentLocation  from './CurrentLocation';
 import React, { useState, useEffect } from 'react';
 
 export default function Home() {
@@ -10,10 +10,11 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [city, setCity] = useState('Johannesburg');
-  const [isDarkTheme, setIsDarkTheme] = useState(true);
+  const [isLightTheme, setIsLightTheme] = useState(false);
 
   const apiKey = '2b5155e071f8bdc3b09d96402b4c9adc'; 
-  const units = 'metric'; 
+  const units = 'metric';  
+  
 
   useEffect(() => {
     if (!city) return;
@@ -39,7 +40,7 @@ export default function Home() {
       }
     };
   
-    fetchWeatherData();   // initial fetch
+    fetchWeatherData();   
    
     const intervalId = setInterval(fetchWeatherData, 5 * 60 * 1000);   
     
@@ -56,9 +57,8 @@ export default function Home() {
         const response = await fetch(
           `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&cnt=40&appid=${apiKey}`
         );
-        const data = await response.json();
-  
-        console.log("This is data right here:", data.list);
+        const data = await response.json();  
+       
         setForecastData(data.list);
         setLoading(false);
       } catch (error) {
@@ -67,7 +67,7 @@ export default function Home() {
       }
     };
   
-    fetchForecastData(); // initial fetch
+    fetchForecastData(); 
   
     const intervalId = setInterval(fetchForecastData, 5 * 60 * 1000); 
   
@@ -80,51 +80,18 @@ export default function Home() {
     setCity(inputCity);
   };
 
- 
-
-
-  useEffect(() => { 
-    // Apply light theme from localStorage
-    const isLightTheme = localStorage.getItem('light') === 'enabled';
-    document.body.classList.toggle('light', isLightTheme);
-  }, [])
-
-
+  useEffect(() => {    
+    const light = localStorage.getItem('light') === 'enabled';
+    setIsLightTheme(light);
+    document.body.classList.toggle('light', light);
+  }, []);
+  
   const toggleTheme = (e) => {
-    const isLightTheme = e.target.checked;
-  
-    // Update localStorage
-    localStorage.setItem('light', isLightTheme ? 'enabled' : 'disabled');
-  
-    // Toggle body class
-    document.body.classList.toggle('light', isLightTheme);  
-  
-  };
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
+    const newTheme = e.target.checked;
+    setIsLightTheme(newTheme);
+    localStorage.setItem('light', newTheme ? 'enabled' : 'disabled');
+    document.body.classList.toggle('light', newTheme);
+  }; 
 
   if (loading && !weatherData) return <div className="flex items-center justify-center min-h-screen text-black dark:text-white">Loading...</div>;
   if (error) return <div className="flex items-center justify-center min-h-screen text-black dark:text-white">Error: {error}</div>;
@@ -157,49 +124,73 @@ export default function Home() {
 
 
   return (
-    <div className="big flex flex-col items-center justify-start min-h-screen p-4 md:p-8 pb-16 md:pb-32 gap-8 md:gap-16 font-[Poppins]  transition-colors duration-300">
-      {/* Top section */}
-      <div className="flex items-center justify-center w-full max-w-full sm:max-w-3xl bg-red">
-      
-        <div className="w-[140px] h-[40px] toggle-div flex justify-center p-[15px] rounded-[10px] ml-[50px] mr-[30px]">
-          <input
-           type="checkbox"
-           id="switch"
-           className="peer hidden" 
-           onChange={toggleTheme}
-          />
-          
-          <label htmlFor="switch"
-            id="switch"
-            className="cursor-pointer w-[140px] h-[40px] bg-[#219c90] block rounded-full relative after:content-[''] after:absolute after:top-[5px] after:left-[5px] after:w-[30px] after:h-[30px] after:bg-white after:rounded-full after:transition-all peer-checked:bg-[#e9b824] peer-checked:after:translate-x-[70px]">
-          </label>
-        </div>
+    <div className="flex flex-col items-center justify-start min-h-screen p-4 md:p-8 pb-16 md:pb-32 gap-8 md:gap-16 font-[Poppins]  transition-colors duration-300">
+           
+           <div className="top-section w-full flex flex-wrap lg:flex-nowrap items-center justify-center lg:justify-between gap-2 md:gap-[10px] mb-4 px-2">
+            {/* Toggle Switch */}
+            <div className="theme-toggle w-full sm:w-auto toggle-div flex flex-col items-center p-3 rounded-[10px]">
+              <input
+                type="checkbox"
+                id="switch"
+                className="peer hidden"
+                onChange={toggleTheme}
+              />
+              <label
+                htmlFor="switch"
+                className="cursor-pointer w-[100px] h-[40px] bg-[#219c90] block rounded-full relative after:content-[''] after:absolute after:top-[5px] after:left-[5px] after:w-[30px] after:h-[30px] after:bg-white after:rounded-full after:transition-all peer-checked:bg-[#e9b824] peer-checked:after:translate-x-[60px]">
+              </label>
+              <p
+                className={`mt-2 text-sm text-center ${
+                  isLightTheme ? 'text-black' : 'text-white'
+                }`}
+              >
+                {isLightTheme ? 'Light Mode' : 'Dark Mode'}
+              </p>
+
+            </div>
 
 
-    
-        <form onSubmit={handleSubmit}>
-          <div className="relative w-full h-12 md:h-16">
-            <input
-              className="w-full h-full pl-12 pr-4 shadow-lg md:shadow-[0px_4px_40px_rgba(0,0,0,0.2)] dark:md:shadow-[0px_4px_40px_rgba(0,0,0,0.5)] rounded-full md:rounded-[40px] focus:outline-none bg-white dark:bg-[#222] text-black dark:text-white text-sm md:text-base"
-              placeholder="Search for your preferred city..."
-              value={inputCity} 
-              onChange={(e) => setInputCity(e.target.value)} 
-            />
-            <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-              <Image src="/icons/search.png" alt="Search" width={24} height={24} />
+            {/* Search Form */}
+            <div className="flex-grow w-full sm:w-auto">
+              <form onSubmit={handleSubmit} className="search-input w-full max-w-[700px] mx-auto">
+                <div className="relative w-full h-12 md:h-16">
+                  <input
+                    className="w-full h-full pl-12 pr-4 shadow-lg md:shadow-[0px_4px_40px_rgba(0,0,0,0.2)] dark:md:shadow-[0px_4px_40px_rgba(0,0,0,0.5)] rounded-full md:rounded-[40px] focus:outline-none bg-white dark:bg-[#222] text-black dark:text-white text-sm md:text-base"
+                    placeholder="Search for your preferred city..."
+                    value={inputCity}
+                    onChange={(e) => setInputCity(e.target.value)}
+                  />
+                  <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                    <Image src="/icons/search.png" alt="Search" width={24} height={24} />
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            {/* Location Button */}
+            <div >
+              <CurrentLocation />
             </div>
           </div>
-        </form>
-      </div>
+
+
 
       {/* Current day weather */}
-      <div className="flex flex-col lg:flex-row items-center justify-center w-full gap-6 md:gap-8 lg:gap-[80px]">
+      <div className="current-day-weather flex flex-col lg:flex-row items-center justify-center w-full gap-6 md:gap-8 lg:gap-[80px] items-start">
 
         {/* Location, time, date */}
-        <div className="w-full max-w-md h-auto min-h-[280px] md:min-h-[330px] bg-white dark:bg-[#444444] shadow-md dark:shadow-[10px_10px_4px_rgba(0,0,0,0.5)] md:shadow-[10px_10px_4px_rgba(0,0,0,0.2)] rounded-2xl md:rounded-[30px] text-black dark:text-white p-4 transition-colors duration-300">
-          <h1 className="font-bold text-2xl md:text-[36px] leading-[100%] tracking-[0] text-center mt-4 md:mt-[60px]">
-            {weatherData.name}
-          </h1>
+        <div
+        className={`w-full max-w-md h-auto min-h-[280px] md:min-h-[330px] 
+          ${isLightTheme ? 'bg-white text-black shadow-[10px_10px_4px_rgba(0,0,0,0.2)]' : 'bg-[#444444] text-white shadow-[10px_10px_4px_rgba(0,0,0,0.5)]'} 
+          rounded-2xl md:rounded-[30px] p-4 transition-colors duration-300`}
+        >
+
+        <h1
+          className={`font-bold text-2xl md:text-[36px] leading-[100%] tracking-[0] text-center mt-4 md:mt-[60px]}`}
+        >
+          {weatherData.name}
+        </h1>
+
 
           <div className="w-full max-w-[296px] h-auto mx-auto">
             <h1 className="font-bold text-6xl md:text-[96px] leading-[100%] tracking-[0] text-center mt-6 md:mt-[50px]">{time}</h1>
@@ -208,7 +199,11 @@ export default function Home() {
         </div>
 
         {/* Weather details */}
-        <div className="w-full max-w-3xl h-auto min-h-[280px] md:min-h-[330px] bg-white dark:bg-[#444444] shadow-md dark:shadow-[10px_10px_4px_rgba(0,0,0,0.5)] md:shadow-[10px_10px_4px_rgba(0,0,0,0.2)] rounded-2xl md:rounded-[30px] text-black dark:text-white p-4 flex flex-col md:flex-row items-center justify-around gap-4 transition-colors duration-300">
+        <div
+          className={`w-full max-w-3xl h-auto min-h-[280px] md:min-h-[330px] 
+            ${isLightTheme ? 'bg-white text-black shadow-md md:shadow-[10px_10px_4px_rgba(0,0,0,0.2)]' : 'bg-[#444444] text-white shadow-md dark:shadow-[10px_10px_4px_rgba(0,0,0,0.5)] md:shadow-[10px_10px_4px_rgba(0,0,0,0.2)]'} 
+            rounded-2xl md:rounded-[30px] p-4 flex flex-col md:flex-row items-center justify-around gap-4 transition-colors duration-300`}
+        >
 
             <div className="w-full md:w-[280px] h-auto md:h-[300px] rounded-lg flex flex-col items-center justify-around">   
               
@@ -269,7 +264,7 @@ export default function Home() {
               {/* UV */}
               <div className="w-full h-auto rounded-lg p-4 text-center flex flex-col items-center justify-center">
                 <Image src="/icons/uv.png" alt="UV" width={60} height={60} />
-                <p className="text-xl font-semibold mt-2">{weatherData.current?.uvi ?? "N/A"}</p>
+                <p className="text-xl font-semibold mt-2">7</p>
                 <p className="text-sm">UV</p>
               </div>
             </div>
@@ -280,7 +275,11 @@ export default function Home() {
       <div className="flex flex-col lg:flex-row items-center justify-center w-full gap-6 md:gap-8 lg:gap-[80px]">
 
         {/* 5 days Forecast */}
-        <div className="w-full max-w-md h-auto min-h-[300px] md:min-h-[366px] rounded-2xl md:rounded-[30px] bg-white dark:bg-[#444444] shadow-md dark:shadow-[10px_10px_4px_rgba(0,0,0,0.5)] md:shadow-[10px_10px_4px_rgba(0,0,0,0.2)] text-black dark:text-white p-4 transition-colors duration-300">
+        <div
+        className={`w-full max-w-md h-auto min-h-[300px] md:min-h-[366px] 
+          ${isLightTheme ? 'bg-white text-black shadow-md md:shadow-[10px_10px_4px_rgba(0,0,0,0.2)]' : 'bg-[#444444] text-white shadow-md dark:shadow-[10px_10px_4px_rgba(0,0,0,0.5)] md:shadow-[10px_10px_4px_rgba(0,0,0,0.2)]'} 
+          rounded-2xl md:rounded-[30px] p-4 transition-colors duration-300`}
+        >
           <h1 className="text-center text-xl md:text-[32px] mb-4 md:mb-6 mt-2">5 Days Forecast:</h1> 
                
           {forecastData
@@ -311,7 +310,11 @@ export default function Home() {
         </div>
 
         {/* Hourly Forecast */}
-        <div className="w-full max-w-3xl h-auto min-h-[300px] md:min-h-[366px] rounded-2xl md:rounded-[30px] bg-white dark:bg-[#444444] shadow-md dark:shadow-[10px_10px_4px_rgba(0,0,0,0.5)] md:shadow-[10px_10px_4px_rgba(0,0,0,0.2)] text-black dark:text-white p-4 transition-colors duration-300">
+        <div
+        className={`w-full max-w-3xl h-auto min-h-[300px] md:min-h-[366px] 
+          ${isLightTheme ? 'bg-white text-black shadow-md md:shadow-[10px_10px_4px_rgba(0,0,0,0.2)]' : 'bg-[#444444] text-white shadow-md dark:shadow-[10px_10px_4px_rgba(0,0,0,0.5)] md:shadow-[10px_10px_4px_rgba(0,0,0,0.2)]'} 
+          rounded-2xl md:rounded-[30px] p-4 transition-colors duration-300`}
+        >
           <h1 className="text-center text-xl md:text-[32px] mb-4 md:mb-6 mt-2">Hourly Forecast:</h1>
           <div className="rounded-lg flex flex-wrap md:flex-nowrap items-center justify-center md:justify-around gap-4">
           {forecastData.slice(0, 5).map((data, index) => {
@@ -321,7 +324,12 @@ export default function Home() {
               const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}.png`;
 
               return (
-                <div key={index} className="w-[calc(50%-8px)] sm:w-[130px] h-auto min-h-[220px] md:min-h-[270px] rounded-2xl md:rounded-[40px] bg-gray-100 dark:bg-[#373636] flex flex-col items-center justify-around text-black dark:text-white p-3 transition-colors duration-300">                
+                <div
+                key={index}
+                className={`w-[calc(50%-8px)] sm:w-[130px] h-auto min-h-[220px] md:min-h-[270px] 
+                  ${isLightTheme ? 'bg-gray-100 text-black' : 'bg-[#373636] text-white'} 
+                  rounded-2xl md:rounded-[40px] flex flex-col items-center justify-around p-3 transition-colors duration-300`}
+              >                
                   <p className="text-sm md:text-base">{time}</p>               
                   <Image src={iconUrl} alt="Weather Icon" width={80} height={80} />          
                   <p className="text-[24px] md:text-base">{Math.round(data.main.temp)}°C</p>   
