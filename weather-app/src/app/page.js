@@ -4,21 +4,20 @@ import CurrentLocation  from './CurrentLocation';
 import React, { useState, useEffect } from 'react';
 
 export default function Home() {
-  const [inputCity, setInputCity] = useState('Johannesburg');
+  const [inputCity, setInputCity] = useState('');
   const [weatherData, setWeatherData] = useState(null);
   const [forecastData, setForecastData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [city, setCity] = useState('Johannesburg');
-  const [isLightTheme, setIsLightTheme] = useState(false);
-
-  const apiKey = '2b5155e071f8bdc3b09d96402b4c9adc'; 
+  const [isLightTheme, setIsLightTheme] = useState(false); 
+  const apiKey = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
   const units = 'metric';  
   
+  // Fetching weather data
 
   useEffect(() => {
-    if (!city) return;
-  
+    if (!city) return;  
     const fetchWeatherData = async () => {
       try {
         setLoading(true);
@@ -41,17 +40,14 @@ export default function Home() {
     };
   
     fetchWeatherData();   
-   
-    const intervalId = setInterval(fetchWeatherData, 5 * 60 * 1000);   
-    
-    return () => clearInterval(intervalId);
-  
+    const intervalId = setInterval(fetchWeatherData, 5 * 60 * 1000);    
+    return () => clearInterval(intervalId);  
   }, [city, units, apiKey]);
   
+  // Fetching forecast data
 
   useEffect(() => {
-    if (!city) return;
-  
+    if (!city) return;  
     const fetchForecastData = async () => {
       try {
         const response = await fetch(
@@ -67,18 +63,12 @@ export default function Home() {
       }
     };
   
-    fetchForecastData(); 
-  
-    const intervalId = setInterval(fetchForecastData, 5 * 60 * 1000); 
-  
+    fetchForecastData();   
+    const intervalId = setInterval(fetchForecastData, 5 * 60 * 1000);   
     return () => clearInterval(intervalId); 
-  }, [city, apiKey]);
-  
+  }, [city, apiKey]);  
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setCity(inputCity);
-  };
+  // Toggle Theme 
 
   useEffect(() => {    
     const light = localStorage.getItem('light') === 'enabled';
@@ -92,9 +82,9 @@ export default function Home() {
     localStorage.setItem('light', newTheme ? 'enabled' : 'disabled');
     document.body.classList.toggle('light', newTheme);
   }; 
+ 
 
-  if (loading && !weatherData) return <div className="flex items-center justify-center min-h-screen text-black dark:text-white">Loading...</div>;
-  if (error) return <div className="flex items-center justify-center min-h-screen text-black dark:text-white">Error: {error}</div>;
+  // Date and time formatting
 
   const formatDate = (date) => {
     const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -115,12 +105,21 @@ export default function Home() {
       hour12: true,
     });
   };
-  
+
   const currentDate = new Date();
   const time = currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const date = formatDate(currentDate);
+  const date = formatDate(currentDate); 
 
-  
+  // City search submit function
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setCity(inputCity);
+  }; 
+ 
+  // Conditional rendering
+
+  if (loading && !weatherData) return <div className="flex items-center justify-center min-h-screen text-black dark:text-white text-2xl">Loading...</div>;
+  if (error) return <div className="flex items-center justify-center min-h-screen text-black dark:text-white">Error: {error}</div>;
 
 
   return (
@@ -137,7 +136,7 @@ export default function Home() {
               />
               <label
                 htmlFor="switch"
-                className="cursor-pointer w-[100px] h-[40px] bg-[#219c90] block rounded-full relative after:content-[''] after:absolute after:top-[5px] after:left-[5px] after:w-[30px] after:h-[30px] after:bg-white after:rounded-full after:transition-all peer-checked:bg-[#e9b824] peer-checked:after:translate-x-[60px]">
+                className="cursor-pointer w-[100px] h-[40px] bg-[#D9D9D9] block rounded-full relative after:content-[''] after:absolute after:top-[5px] after:left-[5px] after:w-[30px] after:h-[30px] after:bg-black after:rounded-full after:transition-all peer-checked:bg-[#D9D9D9] peer-checked:after:translate-x-[60px]">
               </label>
               <p
                 className={`mt-2 text-sm text-center ${
@@ -154,12 +153,15 @@ export default function Home() {
             <div className="flex-grow w-full sm:w-auto">
               <form onSubmit={handleSubmit} className="search-input w-full max-w-[700px] mx-auto">
                 <div className="relative w-full h-12 md:h-16">
-                  <input
-                    className="w-full h-full pl-12 pr-4 shadow-lg md:shadow-[0px_4px_40px_rgba(0,0,0,0.2)] dark:md:shadow-[0px_4px_40px_rgba(0,0,0,0.5)] rounded-full md:rounded-[40px] focus:outline-none bg-white dark:bg-[#222] text-black dark:text-white text-sm md:text-base"
-                    placeholder="Search for your preferred city..."
-                    value={inputCity}
-                    onChange={(e) => setInputCity(e.target.value)}
-                  />
+                <input
+                  className={`w-full h-full pl-12 pr-4 shadow-lg md:shadow-[0px_4px_40px_rgba(0,0,0,0.2)] dark:md:shadow-[0px_4px_40px_rgba(0,0,0,0.5)] 
+                    rounded-full md:rounded-[40px] focus:outline-none text-sm md:text-base 
+                    ${isLightTheme ? 'bg-[D9D9D9] text-black' : 'bg-[#444444] text-white'}`}
+                  placeholder="Search for your preferred city..."
+                  value={inputCity}
+                  onChange={(e) => setInputCity(e.target.value)}
+                />
+
                   <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
                     <Image src="/icons/search.png" alt="Search" width={24} height={24} />
                   </div>
@@ -181,12 +183,12 @@ export default function Home() {
         {/* Location, time, date */}
         <div
         className={`w-full max-w-md h-auto min-h-[280px] md:min-h-[330px] 
-          ${isLightTheme ? 'bg-white text-black shadow-[10px_10px_4px_rgba(0,0,0,0.2)]' : 'bg-[#444444] text-white shadow-[10px_10px_4px_rgba(0,0,0,0.5)]'} 
+          ${isLightTheme ? 'bg-white text-black shadow-[10px_10px_4px_#00000080]' : 'bg-[#444444] text-white shadow-[10px_10px_4px_#00000080]'} 
           rounded-2xl md:rounded-[30px] p-4 transition-colors duration-300`}
         >
 
         <h1
-          className={`font-bold text-2xl md:text-[36px] leading-[100%] tracking-[0] text-center mt-4 md:mt-[60px]}`}
+          className={`font-bold text-2xl md:text-[36px] leading-[100%] tracking-[0] text-center mt-5 md:mt-[60px]}`}
         >
           {weatherData.name}
         </h1>
@@ -201,7 +203,7 @@ export default function Home() {
         {/* Weather details */}
         <div
           className={`w-full max-w-3xl h-auto min-h-[280px] md:min-h-[330px] 
-            ${isLightTheme ? 'bg-white text-black shadow-md md:shadow-[10px_10px_4px_rgba(0,0,0,0.2)]' : 'bg-[#444444] text-white shadow-md dark:shadow-[10px_10px_4px_rgba(0,0,0,0.5)] md:shadow-[10px_10px_4px_rgba(0,0,0,0.2)]'} 
+            ${isLightTheme ? 'bg-white text-black shadow-md md:shadow-[10px_10px_4px_#00000080]' : 'bg-[#444444] text-white shadow-md dark:shadow-[10px_10px_4px_#00000080] md:shadow-[10px_10px_4px_#00000080]'} 
             rounded-2xl md:rounded-[30px] p-4 flex flex-col md:flex-row items-center justify-around gap-4 transition-colors duration-300`}
         >
 
@@ -215,7 +217,7 @@ export default function Home() {
               <div className="text-center md:text-left">               
                   <div className="flex gap-[20px]">
                       <div>
-                         <Image src="/icons/sunrise.png" alt="Sunrise icon" width={50} height={50} />
+                         <Image src={isLightTheme ? "/icons/sunrise-black.png" : "/icons/sunrise.png"} alt="Sunrise icon" width={50} height={50} />
                       </div>
                       <div>
                         <p className="font-normal">Sunrise</p>
@@ -224,7 +226,7 @@ export default function Home() {
                   </div>
                   <div className="flex gap-[20px]">
                       <div>
-                         <Image src="/icons/sunset.png" alt="Sunset icon" width={50} height={50} />
+                         <Image src={isLightTheme ? "/icons/sunset-black.png" : "/icons/sunset.png"} alt="Sunset icon" width={50} height={50} />
                       </div>
                       <div>
                         <p className="font-normal">Sunset</p>
@@ -242,28 +244,28 @@ export default function Home() {
             <div className="grid grid-cols-2 gap-4 md:gap-6">
               {/* Humidity */}
               <div className="w-full h-auto rounded-lg p-4 text-center flex flex-col items-center justify-center">
-                <Image src="/icons/humidity.png" alt="Humidity" width={60} height={60} />
+                <Image src={isLightTheme ? "/icons/humidity-black.png" : "/icons/humidity.png"} alt="Humidity" width={60} height={60} />
                 <p className="text-xl font-semibold mt-2">{weatherData.main.humidity}%</p>
                 <p className="text-sm">Humidity</p>
               </div>
 
               {/* Wind Speed */}
               <div className="w-full h-auto min-w-[150px] rounded-lg p-4 text-center flex flex-col items-center justify-center">
-                <Image src="/icons/wind.png" alt="Wind Speed" width={60} height={60} />
+                <Image src={isLightTheme ? "/icons/wind-black.png" : "/icons/wind.png"} alt="Wind Speed" width={60} height={60} />
                 <p className="text-xl font-semibold mt-2">{(weatherData.wind.speed * 3.6).toFixed(0)} km/h</p>
                 <p className="text-sm">Wind Speed</p>
               </div>
 
               {/* Pressure */}
               <div className="w-full h-auto rounded-lg p-4 text-center flex flex-col items-center justify-center">
-                <Image src="/icons/pressure.png" alt="Pressure" width={60} height={60} />
+                <Image src={isLightTheme ? "/icons/pressure-black.png" : "/icons/pressure.png"} alt="Pressure" width={60} height={60} />
                 <p className="text-xl font-semibold mt-2">{weatherData.main.pressure} hPa</p>
                 <p className="text-sm">Pressure</p>
               </div>
 
               {/* UV */}
               <div className="w-full h-auto rounded-lg p-4 text-center flex flex-col items-center justify-center">
-                <Image src="/icons/uv.png" alt="UV" width={60} height={60} />
+                <Image src={isLightTheme ? "/icons/uv-black.png" : "/icons/uv.png"} alt="UV" width={60} height={60} />
                 <p className="text-xl font-semibold mt-2">7</p>
                 <p className="text-sm">UV</p>
               </div>
@@ -277,7 +279,7 @@ export default function Home() {
         {/* 5 days Forecast */}
         <div
         className={`w-full max-w-md h-auto min-h-[300px] md:min-h-[366px] 
-          ${isLightTheme ? 'bg-white text-black shadow-md md:shadow-[10px_10px_4px_rgba(0,0,0,0.2)]' : 'bg-[#444444] text-white shadow-md dark:shadow-[10px_10px_4px_rgba(0,0,0,0.5)] md:shadow-[10px_10px_4px_rgba(0,0,0,0.2)]'} 
+          ${isLightTheme ? 'bg-white text-black shadow-md md:shadow-[10px_10px_4px_#00000080]' : 'bg-[#444444] text-white shadow-md dark:shadow-[10px_10px_4px_#00000080] md:shadow-[10px_10px_4px_#00000080]'} 
           rounded-2xl md:rounded-[30px] p-4 transition-colors duration-300`}
         >
           <h1 className="text-center text-xl md:text-[32px] mb-4 md:mb-6 mt-2">5 Days Forecast:</h1> 
@@ -294,7 +296,7 @@ export default function Home() {
               return (
                 <div
                   key={index}
-                  className="flex items-center justify-between md:justify-around mb-4 md:mb-6 px-2"
+                  className="flex items-center justify-between md:justify-around px-2"
                 >
                   <Image
                     src={`https://openweathermap.org/img/wn/${forecast.weather[0].icon}@2x.png`}
@@ -312,7 +314,7 @@ export default function Home() {
         {/* Hourly Forecast */}
         <div
         className={`w-full max-w-3xl h-auto min-h-[300px] md:min-h-[366px] 
-          ${isLightTheme ? 'bg-white text-black shadow-md md:shadow-[10px_10px_4px_rgba(0,0,0,0.2)]' : 'bg-[#444444] text-white shadow-md dark:shadow-[10px_10px_4px_rgba(0,0,0,0.5)] md:shadow-[10px_10px_4px_rgba(0,0,0,0.2)]'} 
+          ${isLightTheme ? 'bg-white text-black shadow-md md:shadow-[10px_10px_4px_#00000080]' : 'bg-[#444444] text-white shadow-md dark:shadow-[10px_10px_4px_#00000080] md:shadow-[10px_10px_4px_#00000080]'} 
           rounded-2xl md:rounded-[30px] p-4 transition-colors duration-300`}
         >
           <h1 className="text-center text-xl md:text-[32px] mb-4 md:mb-6 mt-2">Hourly Forecast:</h1>
@@ -327,7 +329,7 @@ export default function Home() {
                 <div
                 key={index}
                 className={`w-[calc(50%-8px)] sm:w-[130px] h-auto min-h-[220px] md:min-h-[270px] 
-                  ${isLightTheme ? 'bg-gray-100 text-black' : 'bg-[#373636] text-white'} 
+                  ${isLightTheme ? 'bg-gradient-to-b from-[#F88505] to-[#F6FAD9] text-black' : 'bg-[#373636] text-white'} 
                   rounded-2xl md:rounded-[40px] flex flex-col items-center justify-around p-3 transition-colors duration-300`}
               >                
                   <p className="text-sm md:text-base">{time}</p>               

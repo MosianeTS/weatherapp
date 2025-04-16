@@ -57,7 +57,7 @@ const CurrentLocation = () => {
   }, []); 
 
   return (
-    <div className="current-location bg-[#4CBB17] w-[320px] h-[62px] rounded-[40px] flex items-center justify-center text-white px-4">
+    <div className="current-location bg-[#4CBB17] w-[292px] h-[62px] rounded-[40px] flex items-center justify-center text-white px-4">
       <div className="flex items-center gap-2">
         <Image alt="current location icon" src="/icons/current.png" className="h-5 w-5 text-white" width={35} height={35} />
         <span>Current location: {loading ? "Loading..." : currentCity}</span>
